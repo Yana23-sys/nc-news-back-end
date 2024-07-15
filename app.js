@@ -4,7 +4,7 @@ const {psqlErrorHandler, customErrorHandler, serverErrorHandler} = require('./er
 
 const {getEndpoints} = require('./endpoints/controllers')
 const {getTopics} = require('./topics')
-const {getArticleById} = require('./articles')
+const {getArticleById, getArticles} = require('./articles')
 
 
 app.get('/api', getEndpoints)
@@ -14,6 +14,7 @@ app.get("/api/topics", getTopics)
 
 
 app.get('/api/articles/:article_id', getArticleById)
+app.get('/api/articles', getArticles)
 
 
 app.all('*', (request, response, next) => {

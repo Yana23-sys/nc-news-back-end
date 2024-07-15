@@ -65,7 +65,7 @@ describe('/api/articles/:article_id', () => {
           .expect(200)
           .then(( {body}) => {
             
-            expect(body.article).toEqual({
+            expect(body).toEqual({
                 article_id: 1,
                 title: 'Living in the shadow of a great man',
                 topic: 'mitch',
@@ -94,6 +94,43 @@ describe('/api/articles/:article_id', () => {
         .expect(400)
         .then(({body}) => {
         expect(body.message).toBe('Bad request')
+        })
+    })
+})
+
+describe('/api/articles', () => {
+    describe('GET', () => {
+        test("200: responds with an array of all articles", () => {
+
+            return request(app)
+            .get("/api/articles")
+            .expect(200)
+            .then(( {body}) => {
+                expect(body).toHaveLength(13)
+        
+                body.forEach( article => {
+                    expect(article).toEqual({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.any(Number)
+                    })
+                })
+            })
+        })
+
+        test('200: responds with articles sorted by date in descending order by defoult', () => {
+            return request(app)
+            .get('/api/articles')
+            .expect(200)
+            .then(( {body} ) => {
+              expect(body[0].title).toBe('Eight pug gifs that remind me of mitch')
+              expect(body).toBeSorted({ key:'created_at', descending: true})
+            })
         })
     })
 })
