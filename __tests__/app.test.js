@@ -93,7 +93,7 @@ describe('/api/articles/:article_id', () => {
         .get('/api/articles/not-a-team')
         .expect(400)
         .then(({body}) => {
-        expect(body.message).toBe('Bad request')
+        expect(body.message).toBe('Invalid article id: not-a-team')
         })
     })
 })
