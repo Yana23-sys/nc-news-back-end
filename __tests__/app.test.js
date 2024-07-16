@@ -165,5 +165,23 @@ describe('/api/articles/:article_id/comments', () => {
               expect(body).toBeSorted({ key:'created_at', ascending: true})
             })
         })
+
+        test('400: responds with an error message when given an invalid id', () => {
+            return request(app)
+            .get('/api/articles/not-id/comments')
+            .expect(400)
+            .then(({ body}) => {
+              expect(body.message).toBe('Bad request')
+            })
+          })
+      
+          test('404: responds with an error message when given a valid but non-existent id', () => {
+            return request(app)
+            .get('/api/articles/999/comments')
+            .expect(404)
+            .then(({ body}) => {
+              expect(body.message).toBe('not found')
+            })
+          })
     })
 })
