@@ -2,7 +2,14 @@ const {
   convertTimestampToDate,
   createRef,
   formatComments,
-} = require("../db/seeds/utils");
+} = require("../utils/utils");
+
+const checkArticleExists = require('../utils/checkExists')
+const db = require('../db/connection')
+
+afterAll(() => {
+  return db.end()
+})
 
 describe("convertTimestampToDate", () => {
   test("returns a new object", () => {
@@ -102,3 +109,17 @@ describe("formatComments", () => {
     expect(formattedComments[0].created_at).toEqual(new Date(timestamp));
   });
 });
+
+describe('checkArticleExists', () => {
+  test('promise resolves with undefined if id exists', () => {
+    return checkArticleExists(1).then(result => {
+      expect(result).toBe(undefined)
+    })
+  })
+
+  test('promise rejects with 404 and error message if id doesn\'t exists', () => {
+    return checkArticleExists(999).catch(err => {
+      expect(err).toEqual({ status: 404, message: "article not found" })
+    })
+  })
+})
