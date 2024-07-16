@@ -11,3 +11,21 @@ exports.selectArticleById = (article_id) => {
       return result.rows[0]
     })
 }
+
+exports.selectArticles = () => {
+
+    return db
+    .query(`
+        SELECT 
+            articles.article_id, title, topic, articles.author, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id)::int AS comment_count
+        FROM articles 
+        LEFT JOIN comments ON articles.article_id = comments.article_id
+        GROUP BY articles.article_id
+        ORDER BY created_at DESC
+    ;`)
+    .then((result) => {
+      return result.rows
+    })
+}
+
+

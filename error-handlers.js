@@ -16,5 +16,5 @@ exports.customErrorHandler = (err, req, res, next) => {
 
 exports.serverErrorHandler = (err, req, res, next) => {
     console.log(err);
-    res.status(500).send({ msg: `Server Error: ${err}`});
+    res.status(500).send({ message: `Server Error: ${err}`});
 }
