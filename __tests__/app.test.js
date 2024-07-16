@@ -137,13 +137,13 @@ describe('/api/articles', () => {
 
 describe('/api/articles/:article_id/comments', () => {
     describe('GET', () => {
-        test.only('200: sends an array of comments for the given article_id', () => {
+        test('200: sends an array of comments for the given article_id', () => {
             return request(app)
             .get('/api/articles/1/comments')
             .expect(200)
             .then(({ body}) => {
                 expect(body.length).toBe(11)
-                console.log(body)
+
                 body.forEach( comment => {
                     expect(comment).toEqual({
                         comment_id: expect.any(Number),
@@ -154,6 +154,15 @@ describe('/api/articles/:article_id/comments', () => {
                         article_id: expect.any(Number)
                     })
                 })
+            })
+        })
+        test('200: responds with comments sorted by date in ascending order by defoult', () => {
+            return request(app)
+            .get('/api/articles/1/comments')
+            .expect(200)
+            .then(( {body} ) => {
+              expect(body[0].comment_id).toBe(9)
+              expect(body).toBeSorted({ key:'created_at', ascending: true})
             })
         })
     })
