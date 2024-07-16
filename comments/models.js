@@ -13,8 +13,23 @@ exports.selectCommentsByArticleId = (article_id) => {
             if (result.rows.length === 0) {
                 return []
             }
-            console.log(result.rows)
             return result.rows
         })
     })
 } 
+
+exports.insertComment = (username, body, article_id) => {
+    const queryStr = `
+    INSERT INTO comments (body, article_id, author) 
+    VALUES ($1, $2, $3) 
+    RETURNING *
+    ;`
+
+    return checkArticleExists(article_id).then(() => {
+        return db.query(queryStr, [body, article_id, username])
+        .then(({ rows }) => {
+            return rows[0]
+        })
+    })
+    
+}

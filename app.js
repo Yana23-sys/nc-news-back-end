@@ -5,7 +5,9 @@ const {psqlErrorHandler, customErrorHandler, serverErrorHandler} = require('./er
 const {getEndpoints} = require('./endpoints/controllers')
 const {getTopics} = require('./topics')
 const {getArticleById, getArticles} = require('./articles')
-const {getCommentsByArticleId} = require('./comments')
+const {getCommentsByArticleId, postComment} = require('./comments')
+
+app.use(express.json())
 
 
 app.get('/api', getEndpoints)
@@ -19,6 +21,8 @@ app.get('/api/articles', getArticles)
 
 
 app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
+app.post('/api/articles/:article_id/comments', postComment)
+
 
 
 
