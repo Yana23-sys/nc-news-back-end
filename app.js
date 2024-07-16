@@ -4,7 +4,7 @@ const {psqlErrorHandler, customErrorHandler, serverErrorHandler} = require('./er
 
 const {getEndpoints} = require('./endpoints/controllers')
 const {getTopics} = require('./topics')
-const {getArticleById, getArticles} = require('./articles')
+const {getArticleById, getArticles, changeArticle} = require('./articles')
 const {getCommentsByArticleId, postComment} = require('./comments')
 
 app.use(express.json())
@@ -17,6 +17,8 @@ app.get("/api/topics", getTopics)
 
 
 app.get('/api/articles/:article_id', getArticleById)
+app.patch('/api/articles/:article_id', changeArticle)
+
 app.get('/api/articles', getArticles)
 
 
