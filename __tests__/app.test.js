@@ -135,7 +135,7 @@ describe('/api/articles', () => {
     })
 })
 
-describe('/api/articles/:article_id/comments', () => {
+describe.only('/api/articles/:article_id/comments', () => {
     describe('GET', () => {
         test('200: sends an array of comments for the given article_id', () => {
             return request(app)
@@ -166,6 +166,15 @@ describe('/api/articles/:article_id/comments', () => {
             })
         })
 
+        test('200: responds with an empty array if the article exists but has no comments', () => {
+            return request(app)
+            .get('/api/articles/7/comments')
+            .expect(200)
+            .then(({ body}) => {
+                expect(body).toEqual([])
+            })
+        })
+
         test('400: responds with an error message when given an invalid id', () => {
             return request(app)
             .get('/api/articles/not-id/comments')
@@ -175,13 +184,13 @@ describe('/api/articles/:article_id/comments', () => {
             })
           })
       
-          test('404: responds with an error message when given a valid but non-existent id', () => {
-            return request(app)
-            .get('/api/articles/999/comments')
-            .expect(404)
-            .then(({ body}) => {
-              expect(body.message).toBe('not found')
-            })
-          })
+        test('404: responds with an error message when given a valid but non-existent id', () => {
+        return request(app)
+        .get('/api/articles/999/comments')
+        .expect(404)
+        .then(({ body}) => {
+            expect(body.message).toBe('article not found')
+        })
+        })
     })
 })
