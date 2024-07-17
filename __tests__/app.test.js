@@ -59,41 +59,170 @@ describe("/api/topics", () => {
 
 
 describe('/api/articles/:article_id', () => {
-    test('GET:200 sends a single article to the client by given id', () => {
-        return request(app)
-          .get('/api/articles/1')
-          .expect(200)
-          .then(( {body}) => {
-            
-            expect(body).toEqual({
-                article_id: 1,
-                title: 'Living in the shadow of a great man',
-                topic: 'mitch',
-                author: 'butter_bridge',
-                body: 'I find this existence challenging',
-                created_at: '2020-07-09T20:11:00.000Z',
-                votes: 100,
-                article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+    describe('GET', () => {
+        test('200: sends a single article to the client by given id', () => {
+            return request(app)
+            .get('/api/articles/1')
+            .expect(200)
+            .then(( {body}) => {
+                
+                expect(body).toEqual({
+                    article_id: 1,
+                    title: 'Living in the shadow of a great man',
+                    topic: 'mitch',
+                    author: 'butter_bridge',
+                    body: 'I find this existence challenging',
+                    created_at: '2020-07-09T20:11:00.000Z',
+                    votes: 100,
+                    article_img_url: 'https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700'
+                })
+                
             })
-            
+        })
+
+        test('404: sends an appropriate status and error message when given a valid but non-existent id', () => {
+        return request(app)
+            .get('/api/articles/999')
+            .expect(404)
+            .then(({body}) => {
+            expect(body.message).toBe('article does not exist')
+            })
+        })
+
+        test('400: sends an appropriate status and error message when given an invalid id', () => {
+        return request(app)
+            .get('/api/articles/not-a-team')
+            .expect(400)
+            .then(({body}) => {
+            expect(body.message).toBe('Invalid article id: not-a-team')
+            })
         })
     })
-
-    test('GET:404 sends an appropriate status and error message when given a valid but non-existent id', () => {
-    return request(app)
-        .get('/api/articles/999')
-        .expect(404)
-        .then(({body}) => {
-        expect(body.message).toBe('article does not exist')
+    
+    describe('PATCH', () => {
+        describe('200: updates the article given by id and returns this article object', () => {
+            test('increments the current article\'s vote property', () => {
+                return request(app)
+                .patch('/api/articles/1')
+                .send({ inc_votes : 1 })
+                .expect(200)
+                .then(( {body}) => {
+                    expect(body).toEqual({
+                        article_id: 1,
+                        title: 'Living in the shadow of a great man',
+                        topic: 'mitch',
+                        author: 'butter_bridge',
+                        body: 'I find this existence challenging',
+                        created_at: '2020-07-09T20:11:00.000Z',
+                        votes: 101,
+                        article_img_url: expect.any(String)
+                    })
+                })
+            })
+            test('decrements the current article\'s vote property', () => {
+                return request(app)
+                .patch('/api/articles/1')
+                .send({ inc_votes : -50 })
+                .expect(200)
+                .then(( {body}) => {
+                    expect(body).toEqual({
+                        article_id: 1,
+                        title: 'Living in the shadow of a great man',
+                        topic: 'mitch',
+                        author: 'butter_bridge',
+                        body: 'I find this existence challenging',
+                        created_at: '2020-07-09T20:11:00.000Z',
+                        votes: 50,
+                        article_img_url: expect.any(String)
+                    })
+                })
+            })
+            test('if the article doesn\'t have a votes property, it\'s incremented from 0 (votes value by defoult)', () => {
+                return request(app)
+                .patch('/api/articles/2')
+                .send({ inc_votes : 10 })
+                .expect(200)
+                .then(( {body}) => {
+                    expect(body).toEqual({
+                        article_id: 2,
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: 10,
+                        article_img_url: expect.any(String)
+                    })
+                })
+            })
+            test('if the article doesn\'t have a votes property, it\'s decremented from 0 (votes value by defoult)', () => {
+                return request(app)
+                .patch('/api/articles/2')
+                .send({ inc_votes : -10 })
+                .expect(200)
+                .then(( {body}) => {
+                    expect(body).toEqual({
+                        article_id: 2,
+                        title: expect.any(String),
+                        topic: expect.any(String),
+                        author: expect.any(String),
+                        body: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: -10,
+                        article_img_url: expect.any(String)
+                    })
+                })
+            })
         })
-    })
 
-    test('GET:400 sends an appropriate status and error message when given an invalid id', () => {
-    return request(app)
-        .get('/api/articles/not-a-team')
-        .expect(400)
-        .then(({body}) => {
-        expect(body.message).toBe('Invalid article id: not-a-team')
+        test('400: responds with an error message when given an invalid id', () => {
+            return request(app)
+            .patch('/api/articles/not-an-id')
+            .send({ inc_votes : 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('404: responds with an error message when given a valid but non-existent id', () => {
+            return request(app)
+            .patch('/api/articles/999')
+            .send({ inc_votes : 1 })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.message).toBe('article not found')
+            });
+        })
+
+        test('400: responds with an error message when given a body that does not contain the correct field', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({})
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('400: responds with an error message when given a body with invalid field name', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_vote : 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('400: responds with an error message when given a body with valid field but the value of a field is invalidan (inc_votes is not a number)', () => {
+            return request(app)
+            .patch('/api/articles/1')
+            .send({ inc_votes : 'not-a-number' })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
         })
     })
 })
