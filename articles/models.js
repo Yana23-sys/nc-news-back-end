@@ -12,20 +12,32 @@ exports.selectArticleById = (article_id) => {
     })
 }
 
-exports.selectArticles = () => {
+exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
 
-    return db
-    .query(`
-        SELECT 
-            articles.article_id, title, topic, articles.author, articles.created_at, articles.votes, article_img_url, COUNT(comments.article_id)::int AS comment_count
-        FROM articles 
-        LEFT JOIN comments ON articles.article_id = comments.article_id
-        GROUP BY articles.article_id
-        ORDER BY created_at DESC
-    ;`)
-    .then((result) => {
-      return result.rows
-    })
+  const validSortBy = ['title', 'topic', 'author', 'body', 'created_at', 'votes']
+  const validOrder = ['asc', 'desc']
+  const queryValues = []
+
+  if (sort_by && !validSortBy.includes(sort_by)) {
+    return Promise.reject({ status: 400, message: 'invalid query'})
+  }
+  if (order && !validOrder.includes(order)) {
+    return Promise.reject({ status: 400, message: 'invalid query'})
+  }
+
+  const queryStr = `
+    SELECT articles.article_id, title, topic, articles.author, articles.created_at, articles.votes, article_img_url, 
+    COUNT(comments.article_id)::int AS comment_count
+    FROM articles 
+    LEFT JOIN comments ON articles.article_id = comments.article_id
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order}
+  ;`
+
+  return db.query(queryStr)
+  .then(({ rows }) => {
+    return rows
+  })
 }
 
 exports.updateArticle = (article_id, inc_votes) => {
