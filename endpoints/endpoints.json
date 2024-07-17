@@ -10,14 +10,21 @@
   "GET /api/articles": {
     "description": "serves an array of all articles",
     "queries": [
-      "title",
-      "topic",
-      "author",
-      "body",
-      "created_at",
-      "votes",
-      "asc",
-      "desc"
+      {
+        "query": "topic",
+        "description": "filters the articles by the topic value specified in the query. If the query is omitted, responds with all articles",
+        "examples": ["topic"]
+      },
+      {
+        "query": "sort_by",
+        "description": "sorts the articles by any valid column (defaults to created_at)",
+        "examples": ["title", "topic", "author", "body", "created_at", "votes"]
+      },
+      {
+        "query": "order",
+        "description": "can be set for ascending or descending (defaults to desc)",
+        "examples": ["asc", "desc"]
+      }
     ],
     "exampleResponse": [
       {

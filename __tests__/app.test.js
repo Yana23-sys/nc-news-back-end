@@ -216,7 +216,6 @@ describe('/api/articles', () => {
                 })
             })
         })
-
         test('200: responds with articles sorted by date in descending order by defoult', () => {
             return request(app)
             .get('/api/articles')
@@ -227,7 +226,8 @@ describe('/api/articles', () => {
             })
         })
 
-        describe('?sort_by= responds with an array of articles that is sorted by the given sort_by query column name', () => {
+
+        describe('?sort_by= responds with an array of articles that is ordered by the given sort_by query column name', () => {
             test('title', () => {
                 return request(app)
                 .get('/api/articles?sort_by=title')
@@ -256,7 +256,6 @@ describe('/api/articles', () => {
                 })
             })
         })
-
         test('400: responds with "bad request" error message when given an invalid sort_by query', () => {
             return request(app)
             .get('/api/articles?sort_by=invalid-query')
@@ -266,6 +265,7 @@ describe('/api/articles', () => {
             })
         })
 
+
         test('?order= responds with an array of treasures ordered by the given order query', () => {
             return request(app)
             .get('/api/articles?order=asc')
@@ -274,7 +274,6 @@ describe('/api/articles', () => {
                 expect(body).toBeSorted({ key:'created_at', ascending: true})
             })
         })
-
         test('400: responds with "bad request" error message when given an invalid order query', () => {
             return request(app)
             .get('/api/articles?order=invalid-query')
@@ -282,7 +281,62 @@ describe('/api/articles', () => {
             .then(({ body }) => {
               expect(body.message).toBe('invalid query')
             })
-          })
+        })
+
+
+        test('?topic= responds with only the articles from given topic query', () => {
+            return request(app)
+            .get('/api/articles?topic=cats')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toHaveLength(1)
+
+                body.forEach(article => {
+                    expect(article).toEqual({
+                        article_id: expect.any(Number),
+                        title: expect.any(String),
+                        topic: 'cats',
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.any(Number)
+                    })
+                })    
+            })
+        })
+        test('404: responds with "not found" error message when given a topic that does not exist', () => {
+            return request(app)
+            .get('/api/articles?topic=dogs')
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.message).toBe('not found')
+            })
+        })
+
+
+        test('200: sort_by and order queries together', () => {
+            return request(app)
+              .get('/api/articles?sort_by=title&order=asc')
+              .expect(200)
+              .then(({ body }) => {
+                expect(body).toBeSorted('title', { ascending: true })
+              })
+        })
+        test('200: sort_by, order and topic queries all together', () => {
+            return request(app)
+            .get('/api/articles?topic=mitch&sort_by=author&order=asc')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toHaveLength(12)
+
+                body.forEach(article => {
+                expect(article.topic).toBe('mitch')
+                })
+
+                expect(body).toBeSorted('author', { ascending: true })
+            })
+        })
     })
 })
 

@@ -12,11 +12,12 @@ exports.selectArticleById = (article_id) => {
     })
 }
 
-exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
+exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc') => {
 
   const validSortBy = ['title', 'topic', 'author', 'body', 'created_at', 'votes']
   const validOrder = ['asc', 'desc']
   const queryValues = []
+
 
   if (sort_by && !validSortBy.includes(sort_by)) {
     return Promise.reject({ status: 400, message: 'invalid query'})
@@ -25,17 +26,28 @@ exports.selectArticles = (sort_by = 'created_at', order = 'desc') => {
     return Promise.reject({ status: 400, message: 'invalid query'})
   }
 
-  const queryStr = `
+  let queryStr = `
     SELECT articles.article_id, title, topic, articles.author, articles.created_at, articles.votes, article_img_url, 
     COUNT(comments.article_id)::int AS comment_count
     FROM articles 
     LEFT JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order}
-  ;`
+  `
 
-  return db.query(queryStr)
+  if (topic) {
+    queryStr += `WHERE topic=$1`
+    queryValues.push(topic)
+  }
+
+  queryStr += `
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order};
+  `
+
+  return db.query(queryStr, queryValues)
   .then(({ rows }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ status: 404, message: 'not found'})
+    }
     return rows
   })
 }
