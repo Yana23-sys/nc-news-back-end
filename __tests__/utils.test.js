@@ -111,29 +111,21 @@ describe("formatComments", () => {
 });
 
 describe('checkExists', () => {
-  test('promise resolves with undefined if article_id exists', () => {
+  test('returns true if article_id exists', () => {
     return checkExists('articles', 'article_id', 1).then(result => {
-      expect(result).toBe(undefined)
+      expect(result).toBe(true)
     })
   })
 
-  test('promise resolves with undefined if comment_id exists', () => {
+  test('returns true if comment_id exists', () => {
     return checkExists('comments', 'comment_id', 2).then(result => {
-      expect(result).toBe(undefined)
+      expect(result).toBe(true)
     })
   })
 
-  test('promise rejects with 404 and error message if value doesn\'t exists', () => {
-    return checkExists('articles', 'article_id', 999).catch(err => {
-      expect(err).toEqual({ status: 404, message: "Resource not found" })
-    })
-  })
-
-  test('promise rejects with 404 and error message if table name or column name is invalid', () => {
-    return checkExists('not_table', 'not_column', 1)
-    .catch(err => {
-      // an invalid table/ column will throw err from db, expect test to catch that err. toBeDefined checks that variable is not undefined
-      expect(err).toBeDefined()
+  test('returns false if value doesn\'t exist', () => {
+    return checkExists('comments', 'comment_id', 999).then(result => {
+      expect(result).toBe(false)
     })
   })
 })

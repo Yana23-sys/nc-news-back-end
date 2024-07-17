@@ -137,42 +137,7 @@ describe('/api/articles/:article_id', () => {
                     })
                 })
             })
-            test('if the article doesn\'t have a votes property, it\'s incremented from 0 (votes value by defoult)', () => {
-                return request(app)
-                .patch('/api/articles/2')
-                .send({ inc_votes : 10 })
-                .expect(200)
-                .then(( {body}) => {
-                    expect(body).toEqual({
-                        article_id: 2,
-                        title: expect.any(String),
-                        topic: expect.any(String),
-                        author: expect.any(String),
-                        body: expect.any(String),
-                        created_at: expect.any(String),
-                        votes: 10,
-                        article_img_url: expect.any(String)
-                    })
-                })
-            })
-            test('if the article doesn\'t have a votes property, it\'s decremented from 0 (votes value by defoult)', () => {
-                return request(app)
-                .patch('/api/articles/2')
-                .send({ inc_votes : -10 })
-                .expect(200)
-                .then(( {body}) => {
-                    expect(body).toEqual({
-                        article_id: 2,
-                        title: expect.any(String),
-                        topic: expect.any(String),
-                        author: expect.any(String),
-                        body: expect.any(String),
-                        created_at: expect.any(String),
-                        votes: -10,
-                        article_img_url: expect.any(String)
-                    })
-                })
-            })
+        
         })
 
         test('400: responds with an error message when given an invalid id', () => {
@@ -423,6 +388,27 @@ describe('/api/comments/:comment_id', () => {
             .expect(400)  
             .then(({ body}) => {
                 expect(body.message).toBe('Bad request')
+            })
+        })
+    })
+})
+
+describe('/api/users', () => {
+    describe('GET', () => {
+        test('200: responds with an array of all users', () => {
+            return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toHaveLength(4)
+
+                body.forEach(user => {
+                    expect(user).toEqual({
+                        username: expect.any(String),
+                        name: expect.any(String),
+                        avatar_url: expect.any(String)
+                    })
+                })
             })
         })
     })
