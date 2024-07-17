@@ -394,7 +394,7 @@ describe('/api/comments/:comment_id', () => {
 })
 
 describe('/api/users', () => {
-    describe.only('GET', () => {
+    describe('GET', () => {
         test('200: responds with an array of all users', () => {
             return request(app)
             .get('/api/users')

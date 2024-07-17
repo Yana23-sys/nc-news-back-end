@@ -7,8 +7,9 @@ checkExists = (tableName, columnName, columnValue) => {
     return db.query( queryStr, [columnValue] )
     .then(({ rows }) => {
         if (rows.length === 0) {
-            return Promise.reject({ status: 404, message: `Resource not found` })
-        }
+            return false
+        } 
+        return true
     })
 }
 
