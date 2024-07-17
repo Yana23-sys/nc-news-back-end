@@ -226,6 +226,63 @@ describe('/api/articles', () => {
               expect(body).toBeSorted({ key:'created_at', descending: true})
             })
         })
+
+        describe('?sort_by= responds with an array of articles that is sorted by the given sort_by query column name', () => {
+            test('title', () => {
+                return request(app)
+                .get('/api/articles?sort_by=title')
+                .expect(200)
+                .then(( {body} ) => {
+                    expect(body[0].title).toBe('Z')
+                    expect(body).toBeSorted({ key:'title', descending: true})
+                })
+            })
+            test('author', () => {
+                return request(app)
+                .get('/api/articles?sort_by=author')
+                .expect(200)
+                .then(( {body} ) => {
+                    expect(body[0].author).toBe('rogersop')
+                    expect(body).toBeSorted({ key:'author', descending: true})
+                })
+            })
+            test('topic', () => {
+                return request(app)
+                .get('/api/articles?sort_by=topic')
+                .expect(200)
+                .then(( {body} ) => {
+                    expect(body[0].topic).toBe('mitch')
+                    expect(body).toBeSorted({ key:'topic', descending: true})
+                })
+            })
+        })
+
+        test('400: responds with "bad request" error message when given an invalid sort_by query', () => {
+            return request(app)
+            .get('/api/articles?sort_by=invalid-query')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('invalid query')
+            })
+        })
+
+        test('?order= responds with an array of treasures ordered by the given order query', () => {
+            return request(app)
+            .get('/api/articles?order=asc')
+            .expect(200)
+            .then(( {body} ) => {
+                expect(body).toBeSorted({ key:'created_at', ascending: true})
+            })
+        })
+
+        test('400: responds with "bad request" error message when given an invalid order query', () => {
+            return request(app)
+            .get('/api/articles?order=invalid-query')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('invalid query')
+            })
+          })
     })
 })
 

@@ -9,6 +9,16 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles",
+    "queries": [
+      "title",
+      "topic",
+      "author",
+      "body",
+      "created_at",
+      "votes",
+      "asc",
+      "desc"
+    ],
     "exampleResponse": [
       {
         "article_id": 1,
