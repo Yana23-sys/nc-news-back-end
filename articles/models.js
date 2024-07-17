@@ -30,6 +30,10 @@ exports.selectArticles = () => {
 
 exports.updateArticle = (article_id, inc_votes) => {
 
+  if (typeof inc_votes !== 'number') {
+    return Promise.reject({ status: 400, message: 'Bad request' })
+  }
+
   return db.query(`UPDATE articles
     SET votes = votes + $1
     WHERE article_id = $2
