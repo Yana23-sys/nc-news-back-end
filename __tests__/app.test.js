@@ -392,3 +392,24 @@ describe('/api/comments/:comment_id', () => {
         })
     })
 })
+
+describe('/api/users', () => {
+    describe.only('GET', () => {
+        test('200: responds with an array of all users', () => {
+            return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toHaveLength(4)
+
+                body.forEach(user => {
+                    expect(user).toEqual({
+                        username: expect.any(String),
+                        name: expect.any(String),
+                        avatar_url: expect.any(String)
+                    })
+                })
+            })
+        })
+    })
+})
