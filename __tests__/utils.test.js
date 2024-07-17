@@ -4,7 +4,7 @@ const {
   formatComments,
 } = require("../utils/utils");
 
-const checkArticleExists = require('../utils/checkExists')
+const checkExists = require('../utils/checkExists')
 const db = require('../db/connection')
 
 afterAll(() => {
@@ -110,16 +110,30 @@ describe("formatComments", () => {
   });
 });
 
-describe('checkArticleExists', () => {
-  test('promise resolves with undefined if id exists', () => {
-    return checkArticleExists(1).then(result => {
+describe('checkExists', () => {
+  test('promise resolves with undefined if article_id exists', () => {
+    return checkExists('articles', 'article_id', 1).then(result => {
       expect(result).toBe(undefined)
     })
   })
 
-  test('promise rejects with 404 and error message if id doesn\'t exists', () => {
-    return checkArticleExists(999).catch(err => {
-      expect(err).toEqual({ status: 404, message: "article not found" })
+  test('promise resolves with undefined if comment_id exists', () => {
+    return checkExists('comments', 'comment_id', 2).then(result => {
+      expect(result).toBe(undefined)
+    })
+  })
+
+  test('promise rejects with 404 and error message if value doesn\'t exists', () => {
+    return checkExists('articles', 'article_id', 999).catch(err => {
+      expect(err).toEqual({ status: 404, message: "Resource not found" })
+    })
+  })
+
+  test('promise rejects with 404 and error message if table name or column name is invalid', () => {
+    return checkExists('not_table', 'not_column', 1)
+    .catch(err => {
+      // an invalid table/ column will throw err from db, expect test to catch that err. toBeDefined checks that variable is not undefined
+      expect(err).toBeDefined()
     })
   })
 })

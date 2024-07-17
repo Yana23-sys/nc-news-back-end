@@ -1,13 +1,24 @@
 const db = require('../db/connection')
+const format = require('pg-format')
 
-const checkArticleExists = (articleId) => {
-    return db.query(
-      "SELECT * FROM articles WHERE article_id = $1;", [articleId] )
-    .then(result => {
-        if (result.rows.length === 0) {
-            return Promise.reject({ status: 404, message: "article not found" })
+checkExists = (tableName, columnName, columnValue) => {
+    const queryStr = format(`SELECT * FROM %I WHERE %I = $1;`, tableName, columnName)
+
+    return db.query( queryStr, [columnValue] )
+    .then(({ rows }) => {
+        if (rows.length === 0) {
+            return Promise.reject({ status: 404, message: `Resource not found` })
         }
     })
 }
 
-module.exports = checkArticleExists
+module.exports = checkExists
+
+
+//  return db.query(
+//     `SELECT * FROM ${tableName} WHERE ${columnName} = $1;`, [columnValue]  )
+//   .then(result => {
+//       if (result.rows.length === 0) {
+//           return Promise.reject({ status: 404, message: "article not found" })
+//       }
+//   })

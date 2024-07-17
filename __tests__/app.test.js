@@ -318,7 +318,7 @@ describe('/api/articles/:article_id/comments', () => {
         .get('/api/articles/999/comments')
         .expect(404)
         .then(({ body}) => {
-            expect(body.message).toBe('article not found')
+            expect(body.message).toBe('Resource not found')
         })
         })
     })
@@ -369,7 +369,7 @@ describe('/api/articles/:article_id/comments', () => {
             .send(newComment)
             .expect(404)
             .then(({ body}) => {
-                expect(body.message).toBe('article not found')
+                expect(body.message).toBe('Resource not found')
             })
         })
 
@@ -396,6 +396,32 @@ describe('/api/articles/:article_id/comments', () => {
             .send(newComment)
             .expect(400)
             .then(({ body }) => {
+                expect(body.message).toBe('Bad request')
+            })
+        })
+    })
+})
+
+describe('/api/comments/:comment_id', () => {
+    describe('DELETE', () => {
+        test('204: deletes a comment from the database given a comment id', () => {
+            return request(app).delete('/api/comments/1').expect(204)
+        })
+
+        test('404: responds with an error message when given comment id does not exist', () => {
+            return request(app)
+            .delete('/api/comments/999')
+            .expect(404)  
+            .then(({ body}) => {
+                expect(body.message).toBe('Resource not found')
+            })
+        })
+
+        test('400: responds with an error message when given invalid comment id', () => {
+            return request(app)
+            .delete('/api/comments/not-number')
+            .expect(400)  
+            .then(({ body}) => {
                 expect(body.message).toBe('Bad request')
             })
         })
