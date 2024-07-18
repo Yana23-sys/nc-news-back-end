@@ -281,7 +281,7 @@ describe('/api/articles', () => {
             .get('/api/articles?order=asc')
             .expect(200)
             .then(( {body} ) => {
-                expect(body).toBeSorted({ key:'created_at', ascending: true})
+                expect(body).toBeSortedBy('created_at')
             })
         })
         test('400: responds with "bad request" error message when given an invalid order query', () => {
@@ -313,6 +313,14 @@ describe('/api/articles', () => {
                         comment_count: expect.any(Number)
                     })
                 })    
+            })
+        })
+        test('?topic= responds with 200 and an empty array when given topic exists but has no articles', () => {
+            return request(app)
+            .get('/api/articles?topic=paper')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body).toEqual([])
             })
         })
         test('404: responds with "not found" error message when given a topic that does not exist', () => {
