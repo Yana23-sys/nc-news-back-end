@@ -1,3 +1,11 @@
+// topics controllers
 const {getTopics} = require('./controllers')
+// router
+const express = require('express')
+const router = express.Router()
 
-exports.getTopics = getTopics
+
+router.get('/', getTopics)
+
+
+module.exports = router

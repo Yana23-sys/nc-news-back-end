@@ -1,34 +1,24 @@
 const express = require("express")
 const app = express()
-const {psqlErrorHandler, customErrorHandler, serverErrorHandler} = require('./error-handlers')
 
+const {psqlErrorHandler, customErrorHandler, serverErrorHandler} = require('./error-handlers')
 const {getEndpoints} = require('./endpoints/controllers')
-const {getTopics} = require('./topics')
-const {getArticleById, getArticles, changeArticle} = require('./articles')
-const {getCommentsByArticleId, postComment, deleteComment} = require('./comments')
-const {getUsers} = require('./users')
+
+const topicsRouter = require('./topics')
+const articlesRouter = require('./articles')
+const commentsRouter = require('./comments')
+const usersRouter = require('./users')
+
 
 app.use(express.json())
 
 
 app.get('/api', getEndpoints)
 
-
-app.get("/api/topics", getTopics)
-
-
-app.get('/api/articles/:article_id', getArticleById)
-app.patch('/api/articles/:article_id', changeArticle)
-
-app.get('/api/articles', getArticles)
-
-
-app.get('/api/articles/:article_id/comments', getCommentsByArticleId)
-app.post('/api/articles/:article_id/comments', postComment)
-
-app.delete('/api/comments/:comment_id', deleteComment)
-
-app.get('/api/users', getUsers)
+app.use('/api/topics', topicsRouter)
+app.use('/api/articles', articlesRouter)
+app.use('/api/comments', commentsRouter)
+app.use('/api/users', usersRouter)
 
 
 app.all('*', (request, response, next) => {
