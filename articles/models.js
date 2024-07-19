@@ -84,4 +84,30 @@ exports.updateArticle = (article_id, inc_votes) => {
     })
 }
 
+exports.insertArticle = ( title, topic, author, body, article_img_url ) => {
+
+  const imgUrl = article_img_url || 'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700'
+
+
+  let queryStr = `
+    INSERT INTO articles (title, topic, author, body, article_img_url)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *, 0 AS comment_count
+  ;`
+
+  const queryValues = [title, topic, author, body, imgUrl]
+
+  // check if topic and author exist
+  const promisesArr = [ checkExists('topics', 'slug', topic), checkExists('users', 'username', author) ]
+
+  return Promise.all(promisesArr).then( results => {
+    if (results.includes(false)) {
+      return Promise.reject({ status: 400, message: `Bad request` }) 
+    } else {
+      return db.query(queryStr, queryValues).then(({ rows }) => {
+        return rows[0]
+      })
+    }
+  }) 
+}
 
