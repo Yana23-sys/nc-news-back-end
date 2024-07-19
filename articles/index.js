@@ -22,3 +22,13 @@ router.post('/:article_id/comments', postComment)
 
 // export router (with all controllers) to app.js 
 module.exports = router
+
+/*
+Routes can be organised further when a particular route accepts different types of HTTP methods by using .route()
+
+router
+.route('/:article_id')
+.get(getArticleById)
+.patch(changeArticle)
+
+*/
