@@ -1,4 +1,4 @@
-const {selectCommentsByArticleId, insertComment, removeCommentById} = require('./models')
+const {selectCommentsByArticleId, insertCommentByArticleId, removeCommentById, updateComment} = require('./models')
 
 
 exports.getCommentsByArticleId = (request, response, next) => {
@@ -10,11 +10,11 @@ exports.getCommentsByArticleId = (request, response, next) => {
   .catch(err => next(err))
 }
 
-exports.postComment = (request, response, next) => {
+exports.postCommentByArticleId = (request, response, next) => {
   const { article_id } = request.params
   const {username, body} = request.body
 
-  insertComment(username, body, article_id).then(comment => {
+  insertCommentByArticleId(username, body, article_id).then(comment => {
     response.status(201).send(comment)
   })
   .catch(err => next(err))
@@ -28,3 +28,16 @@ exports.deleteComment = (request, response, next) => {
   .catch(err => next(err))
 }
 
+exports.changeComment = (request, response, next) => {
+  const {comment_id} = request.params
+  const {inc_votes} = request.body
+
+  updateComment(comment_id, inc_votes)
+  .then((comment) => {
+      response.status(200).send(comment)
+    })
+    .catch(err => {
+      // console.log(err, '<<< controller')
+      return next(err)
+    })
+}
