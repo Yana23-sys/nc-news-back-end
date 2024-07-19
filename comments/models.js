@@ -22,7 +22,7 @@ exports.selectCommentsByArticleId = (article_id) => {
     })
 } 
 
-exports.insertComment = (username, body, article_id) => {
+exports.insertCommentByArticleId = (username, body, article_id) => {
     const queryStr = `
     INSERT INTO comments (body, article_id, author) 
     VALUES ($1, $2, $3) 
@@ -54,3 +54,25 @@ exports.removeCommentById = (comment_id) => {
         }
     })
 }
+
+exports.updateComment = (comment_id, inc_votes) => {
+
+    if (typeof inc_votes !== 'number') {
+      return Promise.reject({ status: 400, message: 'Bad request' })
+    }
+
+    const queryStr = `
+    UPDATE comments
+    SET votes = votes + $1
+    WHERE comment_id = $2
+    RETURNING *
+    ;`
+
+    return db.query(queryStr, [inc_votes, comment_id])
+    .then(({rows}) => {
+        if (rows.length === 0) {
+            return Promise.reject({ status: 404, message: 'comment not found'})
+        }
+        return rows[0]
+    })
+  }

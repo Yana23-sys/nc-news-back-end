@@ -539,6 +539,93 @@ describe('/api/comments/:comment_id', () => {
             })
         })
     })
+    describe('PATCH', () => {
+        describe('200: updates the comment given by id and returns this comment object', () => {
+            test('increments the current comment\'s vote property', () => {
+                return request(app)
+                .patch('/api/comments/1')
+                .send({ inc_votes : 1 })
+                .expect(200)
+                .then(( {body}) => {
+                    expect(body).toEqual({
+                        comment_id: 1,
+                        body: expect.any(String),
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: 17,
+                        article_id: expect.any(Number)
+                    })
+                })
+            })
+            test('decrements the current comment\'s vote property', () => {
+                return request(app)
+                .patch('/api/comments/1')
+                .send({ inc_votes : -1 })
+                .expect(200)
+                .then(( {body}) => {
+                    expect(body).toEqual({
+                        comment_id: 1,
+                        body: expect.any(String),
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: 15,
+                        article_id: expect.any(Number)
+                    })
+                })
+            })
+        
+        })
+
+        test('400: responds with an error message when given an invalid id', () => {
+            return request(app)
+            .patch('/api/comments/not-an-id')
+            .send({ inc_votes : 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('404: responds with an error message when given a valid but non-existent id', () => {
+            return request(app)
+            .patch('/api/comments/999')
+            .send({ inc_votes : 1 })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.message).toBe('comment not found')
+            });
+        })
+
+        test('400: responds with an error message when given a body that does not contain the correct field', () => {
+            return request(app)
+            .patch('/api/comments/1')
+            .send({})
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('400: responds with an error message when given a body with invalid field name', () => {
+            return request(app)
+            .patch('/api/comments/1')
+            .send({ inc_v : 1 })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('400: responds with an error message when given a body with valid field but the value of a field is invalidan (inc_votes is not a number)', () => {
+            return request(app)
+            .patch('/api/comments/1')
+            .send({ inc_votes : 'not-a-number' })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('Bad request')
+            })
+        })
+    })
 })
 
 describe('/api/users', () => {

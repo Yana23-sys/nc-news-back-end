@@ -1,7 +1,7 @@
 // articles controllers
 const {getArticleById, getArticles, changeArticle} = require('./controllers')
 // comments controllers
-const {getCommentsByArticleId, postComment} = require('../comments/controllers')
+const {getCommentsByArticleId, postCommentByArticleId} = require('../comments/controllers')
 
 // router
 const express = require('express')
@@ -16,7 +16,7 @@ router.get('/', getArticles)
 
 // using comments controllers
 router.get('/:article_id/comments', getCommentsByArticleId)
-router.post('/:article_id/comments', postComment)
+router.post('/:article_id/comments', postCommentByArticleId)
 
 
 
