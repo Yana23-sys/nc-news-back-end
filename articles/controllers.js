@@ -1,4 +1,4 @@
-const {selectArticleById, selectArticles, updateArticle} = require('./models')
+const {selectArticleById, selectArticles, updateArticle, insertArticle} = require('./models')
 
 
 exports.getArticleById = (request, response, next) => {
@@ -37,9 +37,16 @@ exports.changeArticle = (request, response, next) => {
     updateArticle(article_id, inc_votes)
     .then((article) => {
         response.status(200).send(article)
-      })
-      .catch(err => {
-        // console.log(err, '<<< controller')
-        return next(err)
-      })
+    })
+    .catch(err =>  next(err))
+}
+
+exports.postArticle = (request, response, next) => {
+    const { title, topic, author, body, article_img_url } = request.body
+
+    insertArticle(title, topic, author, body, article_img_url)
+    .then(article => response.status(201).send(article))
+    .catch(err => {
+        next(err)
+    })
 }

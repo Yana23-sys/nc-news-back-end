@@ -375,6 +375,110 @@ describe('/api/articles', () => {
             })
         })
     })
+
+    describe.only('POST', () => {
+        test('201: inserts a new article to db and sends the new article back to the client', () => {
+            const newArticle = {
+                author: 'butter_bridge',
+                title: 'TEST TITLE',
+                body: 'I like writing tests',
+                topic: 'mitch',
+                article_img_url: 'https://example.com'
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(newArticle)
+            .expect(201)
+            .then(( {body}) => { 
+                    
+                expect(body).toEqual({
+                    article_id: 14,
+                    title: 'TEST TITLE',
+                    topic: 'mitch',
+                    body: 'I like writing tests',
+                    author: 'butter_bridge',
+                    created_at: expect.any(String),
+                    votes: 0,
+                    article_img_url: 'https://example.com',
+                    comment_count: 0
+                })
+            })
+        })
+
+        test('article_img_url - will default if not provided', () => {
+            const newArticle = {
+                author: 'butter_bridge',
+                title: 'TEST TITLE',
+                body: 'I like writing tests',
+                topic: 'mitch'
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(newArticle)
+            .expect(201)
+            .then(( {body}) => {      
+                expect(body).toEqual({
+                    article_id: 14,
+                    title: 'TEST TITLE',
+                    topic: 'mitch',
+                    body: 'I like writing tests',
+                    author: 'butter_bridge',
+                    created_at: expect.any(String),
+                    votes: 0,
+                    article_img_url: 'https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700',
+                    comment_count: 0
+                })
+            })
+        })
+
+        test('400: responds with an error message when given a body that does not contain the correct fields', () => {
+            const newArticle = {
+                author: 'butter_bridge',
+                title: 'TEST TITLE'
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(newArticle)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('400: given author does not exist', () => {
+            const newArticle = {
+                author: 'b',
+                title: 'TEST TITLE',
+                body: 'I like writing tests',
+                topic: 'mitch',
+                article_img_url: 'https://example.com'
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(newArticle)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toBe('Bad request')
+            })
+        })
+
+        test('400: given topic does not exist', () => {
+            const newArticle = {
+                author: 'butter_bridge',
+                title: 'TEST TITLE',
+                body: 'I like writing tests',
+                topic: 'q',
+                article_img_url: 'https://example.com'
+            }
+            return request(app)
+            .post("/api/articles")
+            .send(newArticle)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.message).toBe('Bad request')
+            })
+        })
+    })
 })
 
 describe('/api/articles/:article_id/comments', () => {

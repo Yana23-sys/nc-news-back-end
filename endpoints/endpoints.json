@@ -39,6 +39,27 @@
       }
     ]
   },
+  "POST /api/articles": {
+    "description": "Adds a new article",
+    "exampleRequest": {
+      "author": "butter_bridge",
+      "title": "TEST TITLE",
+      "body": "I like writing tests",
+      "topic": "mitch",
+      "article_img_url": "http://example.com/image.jpg"
+    },
+    "exampleResponse": {
+      "article_id": 14,
+      "title": "TEST TITLE",
+      "topic": "mitch",
+      "body": "I like writing tests",
+      "author": "butter_bridge",
+      "created_at": "2020-07-09T20:11:00.000Z",
+      "votes": 0,
+      "article_img_url": "https://example.com",
+      "comment_count": 0
+    }
+  },
   "GET /api/articles/:article_id": {
     "description": "serves an object of the given article id. It should also include comment_count property, which is the total count of all the comments with this article_id (equals to 0, if the article has no comments)",
     "exampleResponse": {
