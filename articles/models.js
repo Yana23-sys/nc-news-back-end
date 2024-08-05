@@ -20,17 +20,17 @@ exports.selectArticleById = (article_id) => {
     })    
 }
 
-exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc') => {
+exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit = 10, p = 1) => {
 
   const validSortBy = ['title', 'topic', 'author', 'body', 'created_at', 'votes']
   const validOrder = ['asc', 'desc']
 
   // Validate sort_by and order
   if (sort_by && !validSortBy.includes(sort_by)) {
-    return Promise.reject({ status: 400, message: 'invalid query'})
+    return Promise.reject({ status: 400, message: 'invalid sort_by query'})
   }
   if (order && !validOrder.includes(order)) {
-    return Promise.reject({ status: 400, message: 'invalid query'})
+    return Promise.reject({ status: 400, message: 'invalid order query'})
   }
 
   // Build the query string
@@ -41,30 +41,52 @@ exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc') => {
     LEFT JOIN comments ON articles.article_id = comments.article_id
   `
 
-  const queryValues = []
+  const queryValues = [ limit, (p - 1) * limit ]
   if (topic) {
-    queryStr += `WHERE topic=$1`
+    queryStr += `WHERE topic=$3`
     queryValues.push(topic)
   }
 
+
   queryStr += `
     GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order};
-  `
+    ORDER BY ${sort_by} ${order}
+    LIMIT $1 OFFSET $2
+    ;`
 
-  const queriesPromisesArr = [ db.query(queryStr, queryValues) ]
+  const queriesPromisesArr = [
+    db.query(queryStr, queryValues), 
+    getTotalArticleCount(topic) 
+  ]
 
   if (topic) queriesPromisesArr.push(checkExists('topics', 'slug', topic))
   
   return Promise.all(queriesPromisesArr)
-  .then(([ articleResult, topicResult ]) => {
+  .then(([ articleResult, total_count, topicResult ]) => {
 
     if (articleResult.rows.length === 0 && !topicResult) {
       return Promise.reject({ status: 404, message: `not found` }) 
     }
-    return articleResult.rows
+    return { articles: articleResult.rows, total_count }
   })
 }
+
+const getTotalArticleCount = (topic) => {
+
+  let queryStr = `SELECT COUNT(*)::int FROM articles`
+  const queryValues = []
+
+  if (topic) {
+    queryStr += ` WHERE topic=$1`
+    queryValues.push(topic)
+  }
+
+  return db.query(queryStr, queryValues)
+  .then(({ rows }) => {
+    return rows[0].count
+  })
+}
+
 
 exports.updateArticle = (article_id, inc_votes) => {
 
