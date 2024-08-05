@@ -19,15 +19,29 @@ exports.getArticleById = (request, response, next) => {
 }
 
 exports.getArticles = (request, response, next) => {
-    const {topic, sort_by, order} = request.query
+    const {topic, sort_by, order, limit, p} = request.query
 
-    selectArticles(topic, sort_by, order)
-    .then((articles) => {
-        response.status(200).send( articles )
-    })
-    .catch(err => {
-        next(err)
-    })
+    const validationErrs = [
+        isValidPositiveNum(limit, 'limit'), 
+        isValidPositiveNum(p, 'page')
+    ].filter(e => e !== undefined)
+
+    if (validationErrs.length === 0) {
+        selectArticles(topic, sort_by, order, limit, p)
+        .then((articles) => {
+            response.status(200).send( articles )
+        })
+        .catch(err => {
+            next(err)
+        })
+    } else {
+        response.status(400).send( {message: validationErrs.join(', ')} )
+    }
+}
+const isValidPositiveNum = (num, queryName) => {
+    if (num && (isNaN(num) || parseInt(num) <= 0) ) {
+        return `invalid ${queryName} query`
+    }
 }
 
 exports.changeArticle = (request, response, next) => {

@@ -229,9 +229,10 @@ describe('/api/articles', () => {
             .get("/api/articles")
             .expect(200)
             .then(( {body}) => {
-                expect(body).toHaveLength(13)
+                expect(body.articles).toHaveLength(10)
+                expect(body.total_count).toBe(13)
         
-                body.forEach( article => {
+                body.articles.forEach( article => {
                     expect(article).toEqual({
                         article_id: expect.any(Number),
                         title: expect.any(String),
@@ -250,8 +251,8 @@ describe('/api/articles', () => {
             .get('/api/articles')
             .expect(200)
             .then(( {body} ) => {
-              expect(body[0].title).toBe('Eight pug gifs that remind me of mitch')
-              expect(body).toBeSorted({ key:'created_at', descending: true})
+              expect(body.articles[0].title).toBe('Eight pug gifs that remind me of mitch')
+              expect(body.articles).toBeSorted({ key:'created_at', descending: true})
             })
         })
 
@@ -262,8 +263,8 @@ describe('/api/articles', () => {
                 .get('/api/articles?sort_by=title')
                 .expect(200)
                 .then(( {body} ) => {
-                    expect(body[0].title).toBe('Z')
-                    expect(body).toBeSorted({ key:'title', descending: true})
+                    expect(body.articles[0].title).toBe('Z')
+                    expect(body.articles).toBeSorted({ key:'title', descending: true})
                 })
             })
             test('author', () => {
@@ -271,8 +272,8 @@ describe('/api/articles', () => {
                 .get('/api/articles?sort_by=author')
                 .expect(200)
                 .then(( {body} ) => {
-                    expect(body[0].author).toBe('rogersop')
-                    expect(body).toBeSorted({ key:'author', descending: true})
+                    expect(body.articles[0].author).toBe('rogersop')
+                    expect(body.articles).toBeSorted({ key:'author', descending: true})
                 })
             })
             test('topic', () => {
@@ -280,8 +281,8 @@ describe('/api/articles', () => {
                 .get('/api/articles?sort_by=topic')
                 .expect(200)
                 .then(( {body} ) => {
-                    expect(body[0].topic).toBe('mitch')
-                    expect(body).toBeSorted({ key:'topic', descending: true})
+                    expect(body.articles[0].topic).toBe('mitch')
+                    expect(body.articles).toBeSorted({ key:'topic', descending: true})
                 })
             })
         })
@@ -290,17 +291,17 @@ describe('/api/articles', () => {
             .get('/api/articles?sort_by=invalid-query')
             .expect(400)
             .then(({ body }) => {
-              expect(body.message).toBe('invalid query')
+              expect(body.message).toBe('invalid sort_by query')
             })
         })
 
 
-        test('?order= responds with an array of treasures ordered by the given order query', () => {
+        test('?order= responds with an array of articles ordered by the given order query', () => {
             return request(app)
             .get('/api/articles?order=asc')
             .expect(200)
             .then(( {body} ) => {
-                expect(body).toBeSortedBy('created_at')
+                expect(body.articles).toBeSortedBy('created_at')
             })
         })
         test('400: responds with "bad request" error message when given an invalid order query', () => {
@@ -308,7 +309,7 @@ describe('/api/articles', () => {
             .get('/api/articles?order=invalid-query')
             .expect(400)
             .then(({ body }) => {
-              expect(body.message).toBe('invalid query')
+              expect(body.message).toBe('invalid order query')
             })
         })
 
@@ -318,9 +319,10 @@ describe('/api/articles', () => {
             .get('/api/articles?topic=cats')
             .expect(200)
             .then(({ body }) => {
-                expect(body).toHaveLength(1)
+                expect(body.articles).toHaveLength(1)
+                expect(body.total_count).toBe(1)
 
-                body.forEach(article => {
+                body.articles.forEach(article => {
                     expect(article).toEqual({
                         article_id: expect.any(Number),
                         title: expect.any(String),
@@ -339,7 +341,7 @@ describe('/api/articles', () => {
             .get('/api/articles?topic=paper')
             .expect(200)
             .then(({ body }) => {
-                expect(body).toEqual([])
+                expect(body.articles).toEqual([])
             })
         })
         test('404: responds with "not found" error message when given a topic that does not exist', () => {
@@ -357,7 +359,7 @@ describe('/api/articles', () => {
               .get('/api/articles?sort_by=title&order=asc')
               .expect(200)
               .then(({ body }) => {
-                expect(body).toBeSorted('title', { ascending: true })
+                expect(body.articles).toBeSortedBy('title')
               })
         })
         test('200: sort_by, order and topic queries all together', () => {
@@ -365,18 +367,70 @@ describe('/api/articles', () => {
             .get('/api/articles?topic=mitch&sort_by=author&order=asc')
             .expect(200)
             .then(({ body }) => {
-                expect(body).toHaveLength(12)
-
-                body.forEach(article => {
+                body.articles.forEach(article => {
                 expect(article.topic).toBe('mitch')
                 })
 
-                expect(body).toBeSorted('author', { ascending: true })
+                expect(body.articles).toBeSortedBy('author')
             })
         })
+
+        test('limit provided', () => {
+            return request(app)
+            .get("/api/articles?limit=5")
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(5)
+            })
+        })
+        test('page provided', () => {
+            return request(app)
+            .get("/api/articles?p=2")
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(3)
+            })
+        })
+
+        test('400: limit not number', () => {
+            return request(app)
+            .get('/api/articles?limit=invalid-query')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('invalid limit query')
+            })
+        })
+
+        test('400: p not number', () => {
+            return request(app)
+            .get('/api/articles?p=invalid-query')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('invalid page query')
+            })
+        })
+
+        test('400: limit less or equal 0 and p less or equal 0', () => {
+            return request(app)
+            .get('/api/articles?limit=0&p=-1')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('invalid limit query, invalid page query')
+            })
+        })
+
+        test('400: p less or equal 0', () => {
+            return request(app)
+            .get('/api/articles?p=-1')
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.message).toBe('invalid page query')
+            })
+        })
+
     })
 
-    describe.only('POST', () => {
+    describe('POST', () => {
         test('201: inserts a new article to db and sends the new article back to the client', () => {
             const newArticle = {
                 author: 'butter_bridge',
