@@ -22,7 +22,7 @@ exports.selectArticleById = (article_id) => {
 
 exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit = 10, p = 1) => {
 
-  const validSortBy = ['title', 'topic', 'author', 'body', 'created_at', 'votes']
+  const validSortBy = ['title', 'topic', 'author', 'body', 'created_at', 'votes', 'comment_count']
   const validOrder = ['asc', 'desc']
 
   // Validate sort_by and order

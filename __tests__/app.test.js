@@ -285,6 +285,14 @@ describe('/api/articles', () => {
                     expect(body.articles).toBeSorted({ key:'topic', descending: true})
                 })
             })
+            test('comment_count', () => {
+                return request(app)
+                .get('/api/articles?sort_by=comment_count')
+                .expect(200)
+                .then(( {body} ) => {
+                    expect(body.articles).toBeSorted({ key:'comment_count', descending: true})
+                })
+            })
         })
         test('400: responds with "bad request" error message when given an invalid sort_by query', () => {
             return request(app)
