@@ -20,7 +20,7 @@ exports.selectArticleById = (article_id) => {
     })    
 }
 
-exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit = 10, p = 1) => {
+exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit = 10, p = 1, searchQuery = '') => {
 
   const validSortBy = ['title', 'topic', 'author', 'body', 'created_at', 'votes', 'comment_count']
   const validOrder = ['asc', 'desc']
@@ -42,9 +42,15 @@ exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit =
   `
 
   const queryValues = [ limit, (p - 1) * limit ]
-  if (topic) {
+  if (topic && !searchQuery) {
     queryStr += `WHERE topic=$3`
     queryValues.push(topic)
+  } else if (!topic && searchQuery) {
+    queryStr += `WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $3)`
+    queryValues.push(searchQuery)
+  } else if (topic && searchQuery) {
+    queryStr += `WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $3) AND topic=$4`
+    queryValues.push(searchQuery, topic)
   }
 
 
@@ -56,7 +62,7 @@ exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit =
 
   const queriesPromisesArr = [
     db.query(queryStr, queryValues), 
-    getTotalArticleCount(topic) 
+    getTotalArticleCount(topic, searchQuery) 
   ]
 
   if (topic) queriesPromisesArr.push(checkExists('topics', 'slug', topic))
@@ -71,14 +77,21 @@ exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit =
   })
 }
 
-const getTotalArticleCount = (topic) => {
+const getTotalArticleCount = (topic, searchQuery) => {
 
-  let queryStr = `SELECT COUNT(*)::int FROM articles`
+  let queryStr = `SELECT COUNT(*)::int FROM articles `
   const queryValues = []
 
-  if (topic) {
-    queryStr += ` WHERE topic=$1`
+
+  if (topic && !searchQuery) {
+    queryStr += `WHERE topic=$1`
     queryValues.push(topic)
+  } else if (!topic && searchQuery) {
+    queryStr += `WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $1)`
+    queryValues.push(searchQuery)
+  } else if (topic && searchQuery) {
+    queryStr += `WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $1) AND topic=$2`
+    queryValues.push(searchQuery, topic)
   }
 
   return db.query(queryStr, queryValues)

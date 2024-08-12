@@ -24,6 +24,11 @@
         "query": "order",
         "description": "can be set for ascending or descending (defaults to desc)",
         "examples": ["asc", "desc"]
+      },
+      {
+        "query": "search",
+        "description": "filters the articles by the search query",
+        "examples": ["shadow of a great man"]
       }
     ],
     "exampleResponse": [

@@ -361,6 +361,29 @@ describe('/api/articles', () => {
             })
         })
 
+        test('?search= respond only with the articles from given search query', () => {
+            return request(app)
+            .get('/api/articles?search=shadow of a great man')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toHaveLength(1)
+                expect(body.total_count).toBe(1)
+
+                body.articles.forEach(article => {
+                    expect(article).toEqual({
+                        article_id: expect.any(Number),
+                        title: 'Living in the shadow of a great man',
+                        topic: 'mitch',
+                        author: expect.any(String),
+                        created_at: expect.any(String),
+                        votes: expect.any(Number),
+                        article_img_url: expect.any(String),
+                        comment_count: expect.any(Number)
+                    })
+                })    
+            })
+        })
+
 
         test('200: sort_by and order queries together', () => {
             return request(app)

@@ -19,7 +19,7 @@ exports.getArticleById = (request, response, next) => {
 }
 
 exports.getArticles = (request, response, next) => {
-    const {topic, sort_by, order, limit, p} = request.query
+    const {topic, sort_by, order, limit, p, search} = request.query
 
     const validationErrs = [
         isValidPositiveNum(limit, 'limit'), 
@@ -27,7 +27,7 @@ exports.getArticles = (request, response, next) => {
     ].filter(e => e !== undefined)
 
     if (validationErrs.length === 0) {
-        selectArticles(topic, sort_by, order, limit, p)
+        selectArticles(topic, sort_by, order, limit, p, search)
         .then((articles) => {
             response.status(200).send( articles )
         })
