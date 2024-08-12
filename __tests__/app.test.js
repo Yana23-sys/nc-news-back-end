@@ -357,7 +357,7 @@ describe('/api/articles', () => {
             .get('/api/articles?topic=dogs')
             .expect(404)
             .then(({ body }) => {
-              expect(body.message).toBe('not found')
+              expect(body.message).toBe('topic dogs does not exist')
             })
         })
 
