@@ -383,6 +383,14 @@ describe('/api/articles', () => {
                 })    
             })
         })
+        test('?query= responds with 200 and an empty array when given search returns no results', () => {
+            return request(app)
+            .get('/api/articles?search=fooo')
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.articles).toEqual([])
+            })
+        })
 
 
         test('200: sort_by and order queries together', () => {

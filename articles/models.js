@@ -70,7 +70,7 @@ exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit =
   return Promise.all(queriesPromisesArr)
   .then(([ articleResult, total_count, topicResult ]) => {
 
-    if (articleResult.rows.length === 0 && !topicResult) {
+    if (topic && !topicResult) {
       return Promise.reject({ status: 404, message: `not found` }) 
     }
     return { articles: articleResult.rows, total_count }
