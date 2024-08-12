@@ -71,7 +71,7 @@ exports.selectArticles = (topic, sort_by = 'created_at', order = 'desc', limit =
   .then(([ articleResult, total_count, topicResult ]) => {
 
     if (topic && !topicResult) {
-      return Promise.reject({ status: 404, message: `not found` }) 
+      return Promise.reject({ status: 404, message: `topic ${topic} does not exist` }) 
     }
     return { articles: articleResult.rows, total_count }
   })
